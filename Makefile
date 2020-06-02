@@ -66,7 +66,7 @@ MAKEFLAGS += --output-sync --warn-undefined-variables --no-builtin-rules --no-bu
 # Configuration for the project:
 
 # The PDF files to build, each should have a corresponding .tex file:
-PDF_FILES = papers/example.pdf
+PDF_FILES = papers/report.pdf
 
 # Tools to build before the PDF files. This is a list of executable files in
 # the bin/ directory:
