@@ -388,6 +388,7 @@ We structure the remainder of this paper as follows.
 \section{Survey}
 
 % Literature survey
+Papers to include:
 
 
 
@@ -396,7 +397,44 @@ We structure the remainder of this paper as follows.
 
 % Description of what's been done this year in terms of experiments/data
 
+A good foundation for the rest of the PhD is proving that it is actually possible for attackers to exploit exposed information in IPv6 addresses.
+An IPv6 address scanner does not need to scan the entire address space in order to be a plausible attack vector, it only needs to iterate through enough valid address ranges to yield a significant number of active targets in a feasible amount of time.
+It also should to be possible to construct the scanner from publicly available information; 
+attackers may be able to access valid IPv6 addresses illictly through other means, but would likely opt for methods which keep them as anonymous as possible as well as granting them a unique dataset for an economic advantage over similar groups.
 
+
+IPv6 addresses are 128 bits in length, and are usually formed of two 64-bit halves: the network prefix, and the interface identifier.
+A common behaviour in malware variants which aim to recruit as many hosts as possible for botnets, or as space to rent out to other malware operators, is to infect an initial host through a malicious downloaded file and then scan locally to find other machines on the same network.
+This approach has two advantages: circumventing firewalls, and avoiding problems with network address translation common in IPv4 addressing.
+The IPv6 address space is large enough that network address translation would not be required, and attackers would not need to take this into account, but active, correctly configured firewalls would still need to be circumvented in IPv6-only networks;
+initial entry into a network through infected email attachments or downloads, followed by lateral movement through the local network is therefore likely to remain a common behaviour.
+
+\subsection{Local Host Scanning}
+Lateral movement over local networks was the first scenario considered in the construction of an IPv6 scanner.
+The first machine is infected with malware as a result of a user opening a malicious attachment or running a suspect file;
+being able to inspect this first host gives the malicious application a wealth of information, including the 64-bit network prefix used in IPv6 addresses in this particular network.
+This halves the search space, leaving the remaining 64 bits which make up the interface identifier.
+
+The interface identifier half of IPv6 addresses can be allocated in several ways.
+Stateless Address Autoconfiguration (SLAAC) allocates IPv6 addresses based on the local network prefix and the device's link-layer address (ie. the MAC address of the network interface card seeking an address).
+According to RFC7707, SLAAC support is mandatory for IPv6 addressing;
+the vast majority of modern operating systems support the allocation of privacy addresses, which attempt to improve security by obscuring the MAC address information in IPv6 addresses.
+A future point of investigation is to find out if these privacy addresses replace the standard SLAAC address, or if these addresses simple obscure MAC addresses to passive observers;
+it may well be the case that devices with privacy addresses can still be reached through their `hidden' SLAAC address in active scanning attacks.
+
+In either case, the embedded systems used in IoT devices are unlikely to be complex enough to support the assignment of secure IPv6 privacy addresses:
+they will either be too lightweight to support them at all, or they will struggle to implement a random number generator secure enough that its output cannot be predicted.
+IoT devices are currently popular targets for malware campaigns given that they have a tendency to be vulnerable to exploits and are often left with default credentials.
+Migration from IPv4 to IPv6 will not remedy these issues, so this initial experiment assumes that the main targets will be IoT devices with SLAAC-assigned IPv6 addresses which contain exposed MAC address information.
+
+The first half of a MAC address (ie. the first 32 bits) are known as the organisationally unique identifier (OUI). 
+
+
+
+Malware families like Mirai, IoT Reaper, and Mozi have taken advantage of lax IoT security to recruit hosts for botnets, with Mirai in particular amassing enough bots to generate over 1TB/s of traffic used for distributed denial of service attacks (DDoS).
+When working as intended, Mirai denial of service attacks managed to take down Dyn, a popular DNS provider, which prevented many users from accessing popular sites like Amazon and Twitter.
+When not working as intended, Mirai still managed to cause a widespread service outage for TalkTalk and Deutche Telekom customers by taking 900,000 infected routers offline;
+this was caused by a buggy implementation of Mirai which deactivated routers instead of using them to contribute to DDoS attacks.
 
 %==================================================================================================
 \section{Thesis Statement}
