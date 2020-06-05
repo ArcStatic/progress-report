@@ -427,11 +427,34 @@ they will either be too lightweight to support them at all, or they will struggl
 IoT devices are currently popular targets for malware campaigns given that they have a tendency to be vulnerable to exploits and are often left with default credentials.
 Migration from IPv4 to IPv6 will not remedy these issues, so this initial experiment assumes that the main targets will be IoT devices with SLAAC-assigned IPv6 addresses which contain exposed MAC address information.
 
-The first half of a MAC address (ie. the first 32 bits) are known as the organisationally unique identifier (OUI). 
+The first half of a MAC address (ie. the first 24 bits) is known as an organisationally unique identifier (OUI), which is specific to the manufacturer of a given network interface card;
+the second half of the address is specific to that card.
+In SLAAC-assigned IPv6 addresses, this OUI is used as the first 24 bits in the network interface identifier half of the address.
+The constant \texttt{0xFFFE} is used in the following 16 bits of the IPv6 address.
+Given this information, we can state that the final search space for vulnerable IoT devices with SLAAC-assigned IPv6 addresses on a local network is n\*2\^24, where n is the number of OUIs being searched.
+As stated previously, the IPv4 address space, with 2\^32 possible addresses, can be scanned in 5 minutes;
+the address space for 256 different OUIs can be scanned in this time on a local network, making this a viable attack vector for finding a wide variety of IoT devices.
+
+\subsection{Internet-Wide Host Scanning}
+Malicious actors are keen to recruit hosts as widely as possible, particularly botnet operators and outfits who lease hosts to other malware operators;
+a larger number of located targets translates into a business advantage for such parties, so an automated method of boosting these numbers as much as possible is an attractive prospect.
+It is therefore important to consider the use-case of attackers performing Internet-wide scans of the IPv6 address space to find targets not adequately protected by firewalls.
+
+The Border Gateway Protocol (BGP) is used to exchange routing and reachability information between autonomous systems on the wider Internet.
+BGPStream is an application which can be used to process historic BGP data gathered by points known as collectors.
+Announcement messages are of particular interest to this scanning project:
+these indicate that a new IPv6 network prefix was being advertised by an autonomous system, and shows an IPv6 network prefix which was in use at the time.
+Each prefix is accompanied by a mask, which indicates how many bits must be set to specific values for that address;
+as expected from the word `prefix', these bits are always set contiguously from the start of the address.
+This is an integer usually between 1 and 64.
+
+These advertised prefixes can be scraped using the BGPStream API to give a list of active prefixes.
+Further filtering can be done on this list to remove any duplicate prefixes (ie. prefixes which were announced more than once), and to identify which prefixes are subsets of other prefixes
+(ie. if two prefixes have the same address but different masks, the advertised prefix with the larger number as its mask is a subset of the prefix which has the smaller number, due to having more bits set to pre-determined values).
 
 
-
-Malware families like Mirai, IoT Reaper, and Mozi have taken advantage of lax IoT security to recruit hosts for botnets, with Mirai in particular amassing enough bots to generate over 1TB/s of traffic used for distributed denial of service attacks (DDoS).
+\subsection{Relevance of Work to Recent Events}
+Malware families like Mirai, IoT Reaper, and Mozi have taken advantage of lax IoT security to recruit hosts for botnets, with Mirai in particular amassing enough bots to generate over 1Tb/s of traffic used for distributed denial of service attacks (DDoS).
 When working as intended, Mirai denial of service attacks managed to take down Dyn, a popular DNS provider, which prevented many users from accessing popular sites like Amazon and Twitter.
 When not working as intended, Mirai still managed to cause a widespread service outage for TalkTalk and Deutche Telekom customers by taking 900,000 infected routers offline;
 this was caused by a buggy implementation of Mirai which deactivated routers instead of using them to contribute to DDoS attacks.
