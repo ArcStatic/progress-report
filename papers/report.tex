@@ -448,19 +448,66 @@ Each prefix is accompanied by a mask, which indicates how many bits must be set 
 as expected from the word `prefix', these bits are always set contiguously from the start of the address.
 This is an integer usually between 1 and 64.
 
-These advertised prefixes can be scraped using the BGPStream API to give a list of active prefixes.
+These announcement messages can be scraped using the BGPStream API to give a list of prefixes which were active on a given date and time.
 Further filtering can be done on this list to remove any duplicate prefixes (ie. prefixes which were announced more than once), and to identify which prefixes are subsets of other prefixes
 (ie. if two prefixes have the same address but different masks, the advertised prefix with the larger number as its mask is a subset of the prefix which has the smaller number, due to having more bits set to pre-determined values).
 
+The tutorial for prefix monitoring on the BGPStream website scrapes BGP data obtained over 5 hours on August 12th 2014.
+This dataset was relatively small, and therefore a useful starting point for testing the scripts which removed duplicate address announcements and counted the number of instances of each prefix mask.
+This process was repeated for gathering and processing IPv6 prefix announcement data over 5 hours on May 26th 2020, by the same collector which, theoretically, had the same view of the Internet as it did in 2014;
+the 2020 dataset was much larger, containing 88,139 unique advertised prefixes, compared to the 2014 set which only had 1150.
+
+TODO: add table showing full stats for each dataset (raw numbers, totals, percentages)
+
+Although the raw number of prefixes have markedly increased, /48 prefixes remain the most frequently announced in both datasets:
+43.8\% (504 announcements) in the 2014 set and 49.0\% (43205 announcements) in the 2020 set.
+This means that 48 bits of the network prefix are already known.
+Combined with the earlier knowledge that only 24 bits are unknown in the interface identifier half of an IPv6 address for a device with a SLAAC-assigned address, this gives a total search space of 40 bits for prefix announcements with a /48 mask.
+An attacker could iterate through all possible combinations of these 40 bits, however, they do not have to search the space exhaustively;
+any network prefix which consistently returns request timeouts is likely to be firewalled or not in use.
+These prefixes can be discounted from the search, and the scanner can move onto searching the next possible prefix.
+As such, it may be more helpful to think of the network prefix search space as somewhat independent of the interface identifier search space:
+if, after a small number of ping attempts to different possible hosts (eg.100) on the same IPv6 network, the scanner does not receive a reply or a \texttt{Destination host unreachable} response, the prefix can be assumed to be unproductive and not worth searching further.
+This means that /48 prefixes effectively have a search space of 16 bits, in order to iterate through all full 64-bit IPv6 network prefixes;
+a collection of active prefixes can be found in under a minute, assuming a relatively small number of attempts are made to ping different hosts on all possible iterations of these 16 bits.
+Any `live' prefixes which were found during this search can then be fully scanned for the remaining unknown 24 bits in the interface identifier.
+
+/32 announcements were the second most common announced, making up 27.8\% of the 2014 set and 16.3\% of the 2020 set.
+Announced prefixes with a mask smaller than 32 bits were rare:
+3.6\% in 2014 and 4.7\% in 2020.
+Given that 32-bit searches are possible in around 5 minutes, and that the network prefix and interface identifier search spaces are largely independent of each other, there are a very wide range of IPv6 network prefix ranges which can be searched in a feasible amount of time:
+a single /32 advertisement could be searched exhaustively for valid network prefixes in around 5 minutes if only attempting one possible interface identifier, but would take n\*5 minutes when discarding inactive prefix configurations after n attempts, as described previously.
+This is still feasible, but not as likely to produce results as quickly as searching through /48 advertisements.
+/48 advertisements are therefore likely to remain a more popular target for these kinds of attacks.
+
+
+Fully-formed 64-bit IPv6 address prefixes can also be obtained through side-channel attacks, such as harvesting addresses from responses to phishing emails, or .
+These are important security risks to consider, particularly because attacks using these approaches are less complex to perform than using BGP data as described in this section.
+For obvious ethical reasons, in-depth analysis of these side-channel attacks are beyond the scope of this project, but proposed fixes to improve IPv6 security could still help to mitigate any potential damage they may cause;
+improvements in IPv6 addressing security provides additional protection no matter the method of attack.
 
 \subsection{Relevance of Work to Recent Events}
-Malware families like Mirai, IoT Reaper, and Mozi have taken advantage of lax IoT security to recruit hosts for botnets, with Mirai in particular amassing enough bots to generate over 1Tb/s of traffic used for distributed denial of service attacks (DDoS).
+The threat posed by mass recruitment of poorly secured IoT devices is not theoretical.
+Malware families like Mirai, IoT Reaper, and Mozi have taken advantage of lax IoT security in recent years to recruit hosts for botnets, with Mirai in particular amassing enough bots to generate over 1Tb/s of traffic used for distributed denial of service (DDoS) attacks.
 When working as intended, Mirai denial of service attacks managed to take down Dyn, a popular DNS provider, which prevented many users from accessing popular sites like Amazon and Twitter.
 When not working as intended, Mirai still managed to cause a widespread service outage for TalkTalk and Deutche Telekom customers by taking 900,000 infected routers offline;
-this was caused by a buggy implementation of Mirai which deactivated routers instead of using them to contribute to DDoS attacks.
+this was caused by a buggy implementation of Mirai which unintentionally deactivated routers instead of using them to contribute to DDoS attacks.
+
+As shown by the notable increase in the number of IPv6 prefix advertisements in the 2020 BGP dataset compared to the 2014 equivalent, IPv6 deployment is on the rise.
+The number of IoT devices on the market is also increasing, with devices like Amazon Alexa being specifically marketed for domestic use by users who are unlikely to know how to secure their home networks.
+There is a persistent myth that IPv6 is more resilient against scanning attacks (and therefore mass host recruitment) because the address space is too large to search exhaustively;
+the aim of this work is to disprove this, and to emphasise that security through obscurity is not a reliable defense strategy when working with IPv6.
+This is particularly true of IoT device manufacturers, who are infamous for treating security as an afterthought instead of a primary consideration.
+Mass manufacture of devices which are vulnerable to these attacks is unethical, particularly when they are marketed at `non-technical' users as a quality-of-life improvement or when they are used for sensitive data, such as domestic video capture;
+warning manufacturers about the risks of these attacks and advising on how to prevent them is important.
 
 %==================================================================================================
 \section{Thesis Statement}
+
+IPv6 addressing is said to be resistant to scanning attacks due to exhaustive searches not being possible in a 128-bit space.
+This is partially true:
+exhaustive searches are not possible, but the search space can be reduced to feasible ranges through the use of publicly accessible data, such as BGP advertisements and organisationally unique identifiers.
+I will prove this by proving that scanning an address space for specific classes of devices is possible, and identifying how these scanning attacks can be prevented, particularly for IoT devices which are liable to use outdated IPv6 addressing techniques.
 
 % One or two sentences: what is the question I want to answer in this PhD?
 %
@@ -469,7 +516,7 @@ this was caused by a buggy implementation of Mirai which deactivated routers ins
 
 % Malware samples commonly perform scans of the 32-bit IPv4 address space on the Internet or locally on networks initially infected by other means to find new targets; an exhaustive scan of this space can be completed in around 5 minutes, or over several hours in order to avoid drawing attention. No samples are currently known to perform IPv6 address scans for host recruitment due to the complexity of searching a 128-bit space, however, a combination of publicly accessible network data and exposed metadata can reduce this search space down to a feasible range. This exposed metadata may in fact make IPv6 scanning more appealing to malware authors than IPv4 scans: it allows more targeted scanning which can locate specific types of device, while minimising traces of malicious scans by avoiding contact with machines this particular sample is not designed to exploit.
 
-The rapid increase in the number of Internet-connected devices, particularly IoT devices, necessitates increased deployment of IPv6 addresses, to restore the principle of end-to-end connectivity originally envisioned for the Internet at its inception. However, IoT devices are often poorly secured, and often either openly expose device metadata in their IPv6 addresses or rely on weak random number generation which does not adequately obscure it. When combined with publicly available network data, this metadata could be used by attackers to both reduce the IPv6 address search space to a feasible range, and to minimise traces of malicious traffic by only scanning for relevant types of devices. No malware is currently known to use IPv6 scans for host recruitment, but the prospect of stealthier scans is an incentive for malware authors to make the switch from IPv4 scanning. 
+% The rapid increase in the number of Internet-connected devices, particularly IoT devices, necessitates increased deployment of IPv6 addresses, to restore the principle of end-to-end connectivity originally envisioned for the Internet at its inception. However, IoT devices are often poorly secured, and often either openly expose device metadata in their IPv6 addresses or rely on weak random number generation which does not adequately obscure it. When combined with publicly available network data, this metadata could be used by attackers to both reduce the IPv6 address search space to a feasible range, and to minimise traces of malicious traffic by only scanning for relevant types of devices. No malware is currently known to use IPv6 scans for host recruitment, but the prospect of stealthier scans is an incentive for malware authors to make the switch from IPv4 scanning. 
 
 %0=================================================================================================
 \section{Research Plan}
