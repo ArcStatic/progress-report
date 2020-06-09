@@ -384,11 +384,83 @@ We structure the remainder of this paper as follows.
 % The introduction makes claims. The body of the paper provides evidence
 % to support each claim. Check each claim in the introduction, identify
 % the evidence, and forward-reference it from the claim. 
+%
+%==================================================================================================
+\section{Background}
+
+
 %==================================================================================================
 \section{Survey}
 
 % Literature survey
-Papers to include:
+Topics to discuss:
+
+%==================================================================================================
+\section{Malware Lifecycles}
+
+As more and more and more of their customers gained access to the Internet, many businesses made their services more convenient by moving them online.
+The use of online services has become increasingly normalised in the decades since this initial move;
+smartphone app use is pervasive in many countries, online shopping giants like Amazon have changed the commercial landscape, and entertainment services such as Netflix or online multiplayer gaming are commonplace.
+The convenience offered by these services is clearly of high value to many people, and the rise in Internet-connected peripheral devices, known as the Internet of Things (IoT), is an extension of this:
+`smart assistants' like the Amazon Alexa are explicitly marketed at non-technical users as a quality of life improvement, motion-activated cameras like Ring are sold as home privacy enhancements, and smart TVs are advertised as an easy way to enjoy streaming services in domestic settings.
+
+Unfortunately, criminal organisations have also found a range of opportunities in these developments.
+Millions of users submitting sensitive data, such as addresses and banking details, is a goldmine of information to malicious actors, who can easily use information held on a compromised server for identity theft or illicit financial gain.
+Ransomware in particular has been on the rise in recent years, directly extorting payment from victims on the basis that that many businesses and individuals do not reliably back up important data.
+Certain botnet variants, such as Mirai, IoT Reaper, and Mozi, focus specifically on recruiting poorly secured IoT devices left with default login credentials to launch Distributed Denial of Service (DDoS) attacks on key Internet infrastructe, such as DNS servers and Internet Service Providers.
+
+The economy surrounding different types of malware has become increasingly complex as the range of devices on the market has increased.
+Pay-Per-Install (PPI) services were common means of malware distribution in the early 2010s;
+clients (often, but not exclusively, malware authors) would approach a service to install their software on a number of machines in exchange for a fee.
+The actors who would actually install these programs, known as affiliates, would earn commission based on how many instances of these programs they managed to install;
+this was somewhat competitive, as affiliates developed exploits independently and had installs verified through the use of a unique code reported back to the PPI service.
+PPI services have been superceded by Malware-as-a-Service (MaaS) operators, who typically deploy malware variants known as `loaders'.
+These are designed to be subtle and persistent in order to act as a gateway for loading other malware onto infected systems;
+other malware operators, typically ransomware gangs, rent these devices for a period of time to run their malware campaigns in exchange for a fixed fee or a cut of the profits.
+%Ransomware variants typically show an intimidating lockscreen designed to scare users into complying with the ransom demand (bright red backgrounds and live countdown timers are used in many samples).
+
+Loader malware typically enters machines through spam email campaigns, where a user attempts to open a malicious email attachment of some sort.
+The malware then spreads laterally, infecting other hosts on the local network through IPv4 address space scans.
+The use of spam email campaigns with malicious payloads is useful for targeting mainstream operating systems running on complex devices like smartphones, laptops, and desktops, but many botnet operations choose to mass-recruit IoT devices instead.
+IoT devices are generally lightweight, and run their own custom operating systems to allow them to perform their required functions within certain constraints (eg. physical size, battery life).
+Security is often poorly implemented within these custom operating systems, and users often leave the default login credentials in place and fail to apply updates:
+easy targets for mass host recruitment.
+
+%==================================================================================================
+\section{IPv6 Scanning for Malware-as-a-Service}
+
+Recruitment of more devices is of interest to MaaS groups, given that an increased number of loader-infected devices increases their profits.
+%Infected IoT devices are typically used to mount DDoS attacks, but could also be used to access sensitive information like live audio and video capture, or serve as initial entrance points for the lateral spread of loader malware across the local networks they belong to.
+%They can also be used in ransomware campaigns, with users unable to gain access to an infected IoT device until the ransom is paid.
+The wide variety of purposes served by IoT devices means that there is a wide market for leasing them for additional purposes in addition to typical Mirai-style DDoS attacks:
+compromised IoT devices could also be used to access sensitive information such as live audio or video capture, as ransomware victims which are rendered unusable until a ransom is paid, or, potentially, as entry points into a local network to laterally spread loader malware to more complex devices;
+a user who may not fall for opening a suspicious email attachment may still have their device infected by a compromised IoT device without being aware an attack is even taking place.
+
+Both lateral spread through networks and mass recruitment through Internet-wide scans both currently rely on scans of the 32-bit IPv4 address space.
+An exhaustive scan of the IPv4 address space on the wider Internet is trivial:
+these can be performed in 5 minutes at a minimum, but are typically performed over a few hours to reduce suspicion.
+These scans are capable of yielding thousands of hosts, with Mirai hosts generating over 1Tbps of DDoS traffic in an attack against DNS provider Dyn in 2016.
+An IPv4 scan on a local network is even easier, given that the search space is reduced further by a local netmask.
+IPv6 addresses are 128 bits long, and are usually split into two 64-bit halves: the network prefix and the interface identifier.
+An exhaustive search of this space is not feasible.
+However, it can be reduced through publicly accessible information such as Border Gateway Protocol (BGP) advertisements and device metadata embedded in IPv6 addresses.
+All modern operating systems for smartphones, laptops, and desktops obscure this information through the use of IPv6 privacy extensions, but the custom operating systems on IoT devices either openly expose this information, or obscure it poorly through weak random number generation.
+This lack of obfuscation, combined with a general lack of focus on security, continues to make IoT devices an easy target for malicious actors, particularly when they can use this exposed metadata to determine which type of device has been infected and can therefore offer a more bespoke MaaS operation to potential clients;
+this is not possible from address alone in IPv4 scans.
+This also allows MaaS operators to conduct more focused scans, only targeting specific classes of devices while avoiding contact with devices which are not of interest in a particular campaign.
+This minimises the amount of suspicious traffic generated by such scans, in contrast to IPv4 scans which are noisy and probe every reachable device on the network.
+
+IPv4 addressing is unlikely to completely disappear in the next few decades, and malicious actors will continue to perform scans of this address space for mass host recruitment and for lateral spread of malware across local networks.
+However, there is a persistent myth that switching to IPv6 is more secure because the address space is too large to exhaustively scan, and potentially an idea which could be taken as a quick security fix by IoT device manufacturers;
+even if an IoT device only uses IPv6, it is still vulnerable to port scanning attacks if it does not employ robust IPv6 privacy addressing methods.
+
+IoT devices are the primary focus of this PhD project due to the complete lack of privacy addressing in many instances, but more complex devices like smartphones, laptops, and desktops may also be at risk.
+According to RFC7707, stateless address autoconfiguration (SLAAC) support is mandatory for IPv6 address allocation;
+this is the addressing method which leaves device metadata exposed in an allocated address.
+It is not clear if IPv6 privacy addresses by more complex operating systems are allocated in addition to these SLAAC addresses.
+If they are an alternative rather than a replacement, then they only offer protection against passive eavesdropping of network traffic, and no resistance against active probing attacks.
+This would expand the range of targets potentially generated by IPv6 scans for a determined attacker, and is therefore an important future point of investigation in this project.
+
 
 
 
@@ -402,30 +474,11 @@ An IPv6 address scanner does not need to scan the entire address space in order 
 It also should to be possible to construct the scanner from publicly available information; 
 attackers may be able to access valid IPv6 addresses illictly through other means, but would likely opt for methods which keep them as anonymous as possible as well as granting them a unique dataset for an economic advantage over similar groups.
 
-
-IPv6 addresses are 128 bits in length, and are usually formed of two 64-bit halves: the network prefix, and the interface identifier.
-A common behaviour in malware variants which aim to recruit as many hosts as possible for botnets, or as space to rent out to other malware operators, is to infect an initial host through a malicious downloaded file and then scan locally to find other machines on the same network.
-This approach has two advantages: circumventing firewalls, and avoiding problems with network address translation common in IPv4 addressing.
-The IPv6 address space is large enough that network address translation would not be required, and attackers would not need to take this into account, but active, correctly configured firewalls would still need to be circumvented in IPv6-only networks;
-initial entry into a network through infected email attachments or downloads, followed by lateral movement through the local network is therefore likely to remain a common behaviour.
-
 \subsection{Local Host Scanning}
 Lateral movement over local networks was the first scenario considered in the construction of an IPv6 scanner.
-The first machine is infected with malware as a result of a user opening a malicious attachment or running a suspect file;
+The first machine is infected with malware as a result of a user opening a malicious attachment and running a suspect file;
 being able to inspect this first host gives the malicious application a wealth of information, including the 64-bit network prefix used in IPv6 addresses in this particular network.
 This halves the search space, leaving the remaining 64 bits which make up the interface identifier.
-
-The interface identifier half of IPv6 addresses can be allocated in several ways.
-Stateless Address Autoconfiguration (SLAAC) allocates IPv6 addresses based on the local network prefix and the device's link-layer address (ie. the MAC address of the network interface card seeking an address).
-According to RFC7707, SLAAC support is mandatory for IPv6 addressing;
-the vast majority of modern operating systems support the allocation of privacy addresses, which attempt to improve security by obscuring the MAC address information in IPv6 addresses.
-A future point of investigation is to find out if these privacy addresses replace the standard SLAAC address, or if these addresses simple obscure MAC addresses to passive observers;
-it may well be the case that devices with privacy addresses can still be reached through their `hidden' SLAAC address in active scanning attacks.
-
-In either case, the embedded systems used in IoT devices are unlikely to be complex enough to support the assignment of secure IPv6 privacy addresses:
-they will either be too lightweight to support them at all, or they will struggle to implement a random number generator secure enough that its output cannot be predicted.
-IoT devices are currently popular targets for malware campaigns given that they have a tendency to be vulnerable to exploits and are often left with default credentials.
-Migration from IPv4 to IPv6 will not remedy these issues, so this initial experiment assumes that the main targets will be IoT devices with SLAAC-assigned IPv6 addresses which contain exposed MAC address information.
 
 The first half of a MAC address (ie. the first 24 bits) is known as an organisationally unique identifier (OUI), which is specific to the manufacturer of a given network interface card;
 the second half of the address is specific to that card.
@@ -433,20 +486,20 @@ In SLAAC-assigned IPv6 addresses, this OUI is used as the first 24 bits in the n
 The constant \texttt{0xFFFE} is used in the following 16 bits of the IPv6 address.
 Given this information, we can state that the final search space for vulnerable IoT devices with SLAAC-assigned IPv6 addresses on a local network is n\*2\^24, where n is the number of OUIs being searched.
 As stated previously, the IPv4 address space, with 2\^32 possible addresses, can be scanned in 5 minutes;
-the address space for 256 different OUIs can be scanned in this time on a local network, making this a viable attack vector for finding a wide variety of IoT devices.
+the address space for 256 different OUIs can be scanned in this time, making this a viable attack vector for finding a wide variety of IoT devices on a local network.
 
 \subsection{Internet-Wide Host Scanning}
 Malicious actors are keen to recruit hosts as widely as possible, particularly botnet operators and outfits who lease hosts to other malware operators;
 a larger number of located targets translates into a business advantage for such parties, so an automated method of boosting these numbers as much as possible is an attractive prospect.
 It is therefore important to consider the use-case of attackers performing Internet-wide scans of the IPv6 address space to find targets not adequately protected by firewalls.
 
-The Border Gateway Protocol (BGP) is used to exchange routing and reachability information between autonomous systems on the wider Internet.
+BGP is used to exchange routing and reachability information between autonomous systems on the wider Internet.
 BGPStream is an application which can be used to process historic BGP data gathered by points known as collectors.
 Announcement messages are of particular interest to this scanning project:
 these indicate that a new IPv6 network prefix was being advertised by an autonomous system, and shows an IPv6 network prefix which was in use at the time.
 Each prefix is accompanied by a mask, which indicates how many bits must be set to specific values for that address;
 as expected from the word `prefix', these bits are always set contiguously from the start of the address.
-This is an integer usually between 1 and 64.
+This is an integer usually between 29 and 64.
 
 These announcement messages can be scraped using the BGPStream API to give a list of prefixes which were active on a given date and time.
 Further filtering can be done on this list to remove any duplicate prefixes (ie. prefixes which were announced more than once), and to identify which prefixes are subsets of other prefixes
@@ -481,7 +534,7 @@ This is still feasible, but not as likely to produce results as quickly as searc
 /48 advertisements are therefore likely to remain a more popular target for these kinds of attacks.
 
 
-Fully-formed 64-bit IPv6 address prefixes can also be obtained through side-channel attacks, such as harvesting addresses from responses to phishing emails, or .
+Fully-formed 64-bit IPv6 address prefixes can also be obtained through side-channel attacks, such as harvesting addresses from responses to phishing emails, or eavesdropping on network traffic.
 These are important security risks to consider, particularly because attacks using these approaches are less complex to perform than using BGP data as described in this section.
 For obvious ethical reasons, in-depth analysis of these side-channel attacks are beyond the scope of this project, but proposed fixes to improve IPv6 security could still help to mitigate any potential damage they may cause;
 improvements in IPv6 addressing security provides additional protection no matter the method of attack.
@@ -507,7 +560,7 @@ warning manufacturers about the risks of these attacks and advising on how to pr
 IPv6 addressing is said to be resistant to scanning attacks due to exhaustive searches not being possible in a 128-bit space.
 This is partially true:
 exhaustive searches are not possible, but the search space can be reduced to feasible ranges through the use of publicly accessible data, such as BGP advertisements and organisationally unique identifiers.
-I will prove this by proving that scanning an address space for specific classes of devices is possible, and identifying how these scanning attacks can be prevented, particularly for IoT devices which are liable to use outdated IPv6 addressing techniques.
+I will prove this by demonstrating that scanning an address space for specific classes of devices is possible, and will identify how these scanning attacks can be prevented, particularly for IoT devices which are liable to use outdated IPv6 addressing techniques.
 
 % One or two sentences: what is the question I want to answer in this PhD?
 %
