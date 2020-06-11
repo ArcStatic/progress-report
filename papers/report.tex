@@ -409,7 +409,7 @@ Millions of users submitting sensitive data, such as addresses and banking detai
 Ransomware in particular has been on the rise in recent years, directly extorting payment from victims on the basis that that many businesses and individuals do not reliably back up important data.
 Certain botnet variants, such as Mirai, IoT Reaper, and Mozi, focus specifically on recruiting poorly secured IoT devices left with default login credentials to launch Distributed Denial of Service (DDoS) attacks on key Internet infrastructe, such as DNS servers and Internet Service Providers.
 
-The economy surrounding different types of malware has become increasingly complex as the range of devices on the market has increased.
+The economy surrounding different types of malware has become increasingly complex as the range of devices on the market and associated attacks has increased.
 Pay-Per-Install (PPI) services were common means of malware distribution in the early 2010s;
 clients (often, but not exclusively, malware authors) would approach a service to install their software on a number of machines in exchange for a fee.
 The actors who would actually install these programs, known as affiliates, would earn commission based on how many instances of these programs they managed to install;
@@ -421,25 +421,52 @@ other malware operators, typically ransomware gangs, rent these devices for a pe
 
 Loader malware typically enters machines through spam email campaigns, where a user attempts to open a malicious email attachment of some sort.
 The malware then spreads laterally, infecting other hosts on the local network through IPv4 address space scans.
-The use of spam email campaigns with malicious payloads is useful for targeting mainstream operating systems running on complex devices like smartphones, laptops, and desktops, but many botnet operations choose to mass-recruit IoT devices instead.
-IoT devices are generally lightweight, and run their own custom operating systems to allow them to perform their required functions within certain constraints (eg. physical size, battery life).
-Security is often poorly implemented within these custom operating systems, and users often leave the default login credentials in place and fail to apply updates:
-easy targets for mass host recruitment.
+The use of spam email campaigns with malicious payloads generally targets mainstream operating systems running on complex devices like smartphones, laptops, and desktops: devices with a graphical display and text inputs are common targets for keylogger software or popular ransomware variants.
+However, this vector is not limited to these more complex devices: an ambitious criminal enterprise could also use lateral spread to install adapted loader software or otherwise compromise IoT devices on the same local network.
+IoT devices are generally lightweight, and run their own custom operating systems to allow them to perform their required functions within certain constraints (eg. physical size, battery life);
+security is often poorly implemented within these custom operating systems, and users often leave the default login credentials in place and fail to apply updates, making IoT devices easy targets for compromise.
+Malicious spam campaigns targeting personal email accounts, rather than work accounts, are increasingly likely to gain entry to a network containing these poorly secured IoT devices which could capture unusual types of sensitive information:
+a keylogger on a laptop or a smartphone can give information about banking details, passwords, and instant messages, but the compromise of an IoT device could lead to an attacker having access to anything from live audio and video feeds, to control of a home thermostat, to being able to start a fire in the victim's home.
+
+Initial compromise through email attachments is useful for host recruitment in cases where the host is adequately protected by a firewall from Internet-wide scans, for both IoT and for more complex devices:
+a device such as a smartphone, laptop, or desktop acts as the initial vector, which goes on to infect other devices on the network.
+However, many IoT devices intentionally weaken firewall security using a feature known as Universal Plug and Play (UPnP).
+This automatically enables port forwarding on routers to enable access to IoT devices remotely, allowing users to access functionality like remote video feeds and thermostat adjustment while they are away from home.
+While convienient for the user, this also allows attackers access to these devices;
+in the case of Mirai malware variants, these exposed IoT devices are often recruited as part of a botnet used to launch DDoS attacks.
+IoT devices which do not require remote access, and complex devices which do not use UPnP, like smartphones and laptops, are generally not vulnerable to Internet-wide scans and would be more likely to become targets through lateral spread through local networks, as described earlier.
+It is worth noting, however, that a UPnP-enabled IoT device recruited through the use of an Internet-wide scan could become the initial vector which compromises other devices on the local network;
+this is effectively an inverse infection pattern to the malicious email scenario described earlier.
+
+
+Both Internet-wide and local network scans continue to rely on scans of the IPv4 address space;
+neither vectors have yet been adapted for use with IPv6.
+UPnP is necessary in IPv4 networks due to network address translation (NAT), which was used to create the illusion of a larger IPv4 address space.
+An attacker can gain access to an IoT device on a NAT-obscured network by performing a port scan against the IPv4 address assigned to the router, and is then free to compromise the device using the relevant exploit.
+IPv6 solves the address shortage problem by creating a much larger address space for devices and therefore removes the need for UPnP;
+end-to-end connectivity granted by IPv6 also allows any device to be directly routed to, not just machines with manually enabled port-forwarding or UPnP IoT devices as is currently the case.
+It is believed that this larger address space improves security due to being too large to exhaustively scan.
+This is not necessarily true:
+the search space can be reduced to feasible ranges, and metadata embedded in IPv6 addresses, particularly in poorly secured IoT devices, can provide attackers with key information about devices which is not revealed by equivalent IPv4-based scans.
 
 %==================================================================================================
 \section{IPv6 Scanning for Malware-as-a-Service}
 
 Recruitment of more devices is of interest to MaaS groups, given that an increased number of loader-infected devices increases their profits.
+A combination of Internet-wide scans and local network scans for lateral spread will produce the highest yield of hosts;
+IoT devices recruited through Internet-wide scans and devices infected by malicious email attachments or downloads can both serve as initial vectors, and both of these will make use of local network scans to detect and possibly compromise other hosts.
 %Infected IoT devices are typically used to mount DDoS attacks, but could also be used to access sensitive information like live audio and video capture, or serve as initial entrance points for the lateral spread of loader malware across the local networks they belong to.
 %They can also be used in ransomware campaigns, with users unable to gain access to an infected IoT device until the ransom is paid.
-The wide variety of purposes served by IoT devices means that there is a wide market for leasing them for additional purposes in addition to typical Mirai-style DDoS attacks:
-compromised IoT devices could also be used to access sensitive information such as live audio or video capture, as ransomware victims which are rendered unusable until a ransom is paid, or, potentially, as entry points into a local network to laterally spread loader malware to more complex devices;
-a user who may not fall for opening a suspicious email attachment may still have their device infected by a compromised IoT device without being aware an attack is even taking place.
+Internet-exposed IoT devices may even be a preferred route of compromise:
+a user who may not fall for opening a suspicious email attachment may still have their other devices infected by a compromised IoT device without being aware an attack is even taking place.
+Complex devices can become hosts to many different kinds of malware, but the wide range of purposes served by IoT devices also means that there is a potential market for leasing them for additional purposes in addition to typical Mirai-style DDoS attacks, such as accessing live audio or video capture, changing the displays of digital billboards, or holding key home infrastructure like smart thermostats to ransom.
+As the number of purposes served by IoT devices grows, so does the range of potential use-cases for criminal enterprises.
+
 
 Both lateral spread through networks and mass recruitment through Internet-wide scans both currently rely on scans of the 32-bit IPv4 address space.
 An exhaustive scan of the IPv4 address space on the wider Internet is trivial:
 these can be performed in 5 minutes at a minimum, but are typically performed over a few hours to reduce suspicion.
-These scans are capable of yielding thousands of hosts, with Mirai hosts generating over 1Tbps of DDoS traffic in an attack against DNS provider Dyn in 2016.
+As a result of widespread use of UPnP, these scans are capable of yielding thousands of hosts, with Mirai hosts generating over 1Tbps of DDoS traffic in an attack against DNS provider Dyn in 2016.
 An IPv4 scan on a local network is even easier, given that the search space is reduced further by a local netmask.
 IPv6 addresses are 128 bits long, and are usually split into two 64-bit halves: the network prefix and the interface identifier.
 An exhaustive search of this space is not feasible.
@@ -454,7 +481,7 @@ IPv4 addressing is unlikely to completely disappear in the next few decades, and
 However, there is a persistent myth that switching to IPv6 is more secure because the address space is too large to exhaustively scan, and potentially an idea which could be taken as a quick security fix by IoT device manufacturers;
 even if an IoT device only uses IPv6, it is still vulnerable to port scanning attacks if it does not employ robust IPv6 privacy addressing methods.
 
-IoT devices are the primary focus of this PhD project due to the complete lack of privacy addressing in many instances, but more complex devices like smartphones, laptops, and desktops may also be at risk.
+IoT devices are the primary focus of this PhD project due to the complete lack of privacy addressing in many instances, but, as described earlier, more complex devices like smartphones, laptops, and desktops are not immune from being compromised as a result of IPv6 scans.
 According to RFC7707, stateless address autoconfiguration (SLAAC) support is mandatory for IPv6 address allocation;
 this is the addressing method which leaves device metadata exposed in an allocated address.
 It is not clear if IPv6 privacy addresses by more complex operating systems are allocated in addition to these SLAAC addresses.
