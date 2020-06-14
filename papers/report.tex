@@ -212,6 +212,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{color}
+\usepackage[bottom]{footmisc}
 
 % By default, LaTeX adds extra space after punctuation. The \frenchspacing
 % command disables this. This creates tighter looking, more even, text and
@@ -316,87 +317,128 @@
 
 \end{abstract}
 \maketitleACM
-%==================================================================================================
-\section{Introduction}
-
-% A good paper introduction is fairly formulaic. If you follow a simple set
-% of rules, you can write a very good introduction. The following outline can
-% be varied. For example, you can use two paragraphs instead of one, or you
-% can place more emphasis on one aspect of the intro than another. But in all
-% cases, all of the points below need to be covered in an introduction, and
-% in most papers, you don't need to cover anything more in an introduction.
-%
-% Paragraph 1: Motivation. At a high level, what is the problem area you
-% are working in and why is it important? It is important to set the larger
-% context here. Why is the problem of interest and importance to the larger
-% community?
-
-
-
-% Paragraph 2: What is the specific problem considered in this paper? This
-% paragraph narrows down the topic area of the paper. In the first
-% paragraph you have established general context and importance. Here you
-% establish specific context and background.
-
-
-
-% Paragraph 3: "In this paper, we show that...". This is the key paragraph
-% in the introduction - you summarize, in one paragraph, what are the main
-% contributions of your paper, given the context established in paragraphs 
-% 1 and 2. What's the general approach taken? Why are the specific results
-% significant? The story is not what you did, but rather:
-%  - what you show, new ideas, new insights
-%  - why interesting, important?
-% State your contributions: these drive the entire paper.  Contributions
-% should be refutable claims, not vague generic statements.
-
-In this paper, we ...
-
-% Paragraph 4: What are the differences between your work, and what others
-% have done? Keep this at a high level, as you can refer to future sections
-% where specific details and differences will be given, but it is important
-% for the reader to know what is new about this work compared to other work
-% in the area.
-
-
-
-% Paragraph 5: "We structure the remainder of this paper as follows." Give
-% the reader a road-map for the rest of the paper. Try to avoid redundant
-% phrasing, "In Section 2, In section 3, ..., In Section 4, ... ", etc.
-
-We structure the remainder of this paper as follows.
 
 %==================================================================================================
-% Concentrate single-mindedly on a narrative that:
-%  - Describes the problem, and why it's interesting
-%  - Describes your idea
-%  - Defends your idea, showing how it solves the problem, and filling out
-%    the details
-% On the way, cite relevant work in passing, but defer discussion to the
-% end.
-%
-% Introduce the problem, and your idea, using examples, and only then
-% present the general case. Explain the idea as if your were speaking to
-% someone using a whiteboard. Conveying the intuition is primary; details
-% follow. Write in a top down manner: state broad themes and ideas first,
-% then go into details.
-%
-% The introduction makes claims. The body of the paper provides evidence
-% to support each claim. Check each claim in the introduction, identify
-% the evidence, and forward-reference it from the claim. 
-%
-%==================================================================================================
-\section{Background}
-
-
-%==================================================================================================
-\section{Survey}
+\section{Initial Literature Review}
 
 % Literature survey
-Topics to discuss:
+When I accepted the PhD offer, I took this as an opportunity to dedicate several years to studying a topic which has been of personal interest for some time: malware.
+This was the starting point of my research readings during my first year, and this survey section will start with a review of the papers I read as part of my initial efforts to find a research angle on this topic.
+My next step was trying to connect this recent reading about malware and online threats to areas I already have some experience of as a result of past research internships and level 4 and 5 research projects;
+I was already attempting to learn a new domain by reading malware and threat research articles, attempting to learn another unfamiliar domain in addition to this would have less chance of leading to a productive research topic than integrating my existing knowledge of network protocol design.
+Sections \ref{malware-in-transit} reflects on the papers read during this stage.
+
+One pattern that I noticed being repeated in several network measurement papers was the use of scans of the IPv4 address space.
+This led me to read about strategies to scan the IPv6 address space, and any malware was known to use IPv6 address space scanning yet.
+My readings into network measurements and IPv6 are discussed in sections \ref{network-measurements} and \ref{ipv6-reading}.
+
+I also continued to read about the wider context of systems security and cybercrime in parallel to these other topics.
+These papers are discussed in section \ref{cybersecurity}.
+
+\subsection{Malware Samples}
+\label{malware-reading}
+Several of the first papers I found when searching for malware and security research topics were heavily platform- or language-dependent, like surveys of Android platform security \cite{bhat2019} \cite{tam2017}, writing a kernel in Rust \cite{levy2017}, or preventing code reuse attacks in C++ \cite{schuster2015}.
+These were interesting reads, but it was recommended that I direct my search towards more general topics, which were not focused on a specific technology.
+This led to reading papers which could be used to improve the process of analysing malicious binaries, for combinations of both static and dynamic analysis \cite{or-meir2017} \cite{afianian2019} \cite{izumida2010} \cite{izumida2018} \cite{mori2006}.
+\footnote{Tomonori Izumida, the primary or co-author of \cite{mori2006}, \cite{izumida2010} and \cite{izumida2018}, is a researcher at Internet Initiative Japan Innovation Institute (IIJ-II). I will be an intern at this location sometime in 2021, and hope to discuss this work with him while I am there.}
+Malware authors use a range of obfuscation techniques, like binary packing and opaque constants, and there is a lot of ongoing research to adapt existing analysis tools to detect these techniques, or to use machine learning to recognise more ambiguous social engineering-based attacks \cite{maiorca2019}.
+
+
+\subsection{Malware in Transit}
+\label{malware-in-transit}
+An alternate direction for the initial literature review was to look at potential research angles involving malicious traffic, given my past experience of working with network protocol development in the IETF and modifying both kernel and userspace network stacks.
+
+Work by Costa et al. in 2005 proposed using network-level approaches for the automated containment of worms, a rapid, self-propagating class of malware \cite{costa2005}.
+Their proposed system, Vigilante, allows hosts to share information about vulnerabilities in the form of machine-verifiable self-certified alerts (SCA).
+These alerts are generated through the inspection of incoming network traffic, and distributed in a peer-to-peer manner to provide resilience against denial of service attacks and to avoid trusting a central server which could potentially by compromised.
+While Vigilante is useful for detecting network payloads which can be decrypted at kernel-level or by another application at userspace level, it will likely fail on attempting to inspect traffic which is encrypted by a malicious application;
+this is increasingly likely to be the case in the modern Internet, where encrypted payloads are now the default.
+Work by Mori et al. on host-based detection in 2006 notes that even 14 years ago, malware was using self-encryption and polymorphic approaches to evade pattern-matching detection methods used by anti-virus software at the time \cite{mori2006};
+polymorphism is still very common, with many modern ransomware variants compiling themselves on each install to produce custom ransom notes and with open-source malware like Mirai being adapted to greater or lesser degrees by many different authors.
+Instead, they opt to detect worm-like programs by performing automated static analysis, then allowing the program to run in a simulator which allows the potential malware to perform calls to stub replacements for standard kernal API functions.
+Adapting deep traffic inspection and suspicious API calls for a heavily encrypted userspace transport protocol like QUICcould prove to be an interesting future research question, and this was considered as an initial research topic.
+However, this was still at an early stage of the initial literature review, and was similar to the Direct Code Execution \cite{tazaki2013} project I was supposed be doing at Internet Initiative Japan Innovation Institute (IIJ-II) last month (postponed until after the pandemic);
+I decided to spend more time reading to see what other potential research topics were of interest.
+
+\subsection{Network Measurements}
+\label{network-measurements}
+
+\subsection{IPv6 Networks}
+\label{ipv6-reading}
+
+\subsection{Cybercrime and Security}
+\label{cybersecurity}
+
+Paper topics:
+- Malware
+	o dynamic analysis evasion techniques survey (afianian2017)
+	- worm propagation strategies (automated host transmission - doesn't address IoT or specific device scans tho)
+	o survey on current state of security in android platform (bhat2019)
+	- survey of intrusion detection systems leveraging host data
+	o generic binary analysis method for malware (izumida2010)
+	o context-sensitive flow graph for binary analysis (izumida2018)
+	o towards adversarial malware detection (maiorca2019)
+	o tool for analysing and detecting malicious mobile code (mori2006)
+	o dynamic malware analysis in the modern era (or-meir2017)
+	o counterfeit object-oriented programming (schuster2015)
+	o evolution of android malware and android analysis techniques (tam2017)
+	o vigilante: containment of Internet worms (costa2005)
+	- booting the booters
+	o the case for writing a kernel in rust (levy2017)
+
+IPv6:
+	- worm propagation strategies ("although we do not have sufficient data, an informal poll of network operators suggested that servers would be assigned addresses statically, and that these addresses would be located in the low end of the subnet address range, significantly easing the task of a scanning worm" - 2006 paper)
+	- RFC3041: first document about IPv6 privacy extensions, 2001
+	- RFC4941: update to above, 2007
+	- RFC7707: reconnaisance techniques for IPv6
+	- scanning the IPv6 Internet: comprehensive hitlist
+	- address types pamphlet from RIPE NCC
+	- adaptive honeypot system to capture IPv6 scans
+	- target generation for Internet-wide IPv6 scanning
+	- tor instead of IP
+
+IoT:
+	- program analysis of IoT applications for security and privacy
+	- security analysis of autonomous systems
+	- 
+
+Cybercrime/security:
+	- booting the booters
+	- following their footsteps: characterizing account automation abuse
+	- survey on cloud forensics challenges, solutions, and future directions
+	- ethical issues in research using datasets of illicit origin
+	- needle in a haystack: tracking down elite phishing domains in the wild
+
+Network analysis:
+	- empirical study of I2P anonymity network and censorship resistance
+	- understanding tor usage with privacy preserving measurement
+	- first joint look at DoS attacks and BGP blackholing
+	- pushing the boundaries with bdrmapIT: mapping router ownership at scale
+	o direct code execution: revisiting library OS architecture for reproducable network experiments (tazaki2013)
+	- how to catch when proxies lie
+	- analysis of a /0 stealth scan from a botnet
+	- tor instead of IP
+	- using honeynets for internet situational awareness
+	- using packet symmetry to curtail malicious traffic
+	- the day after patch Tuesday
+
+Misc:
+	- predictive analysis in NFV
+
+Although the topic I have chosen, use of IPv6 scanning for host recruitment in malware, can be researched without any practical knowledge of malware analysis, learning this skill is important in order to understand and critically evaluate malware-centric papers better, and is a valuable skill for the future;
+knowing how to analyse malware samples, learning common compiler conventions, and understanding the quirks of different types of assembly code are all important for a career in industry research in this area.
+To the best of my knowledge, malware using IPv6 scanning for host recruitment does not yet exist, but this could change over the next three years;
+being able to perform first-hand analysis on such a sample would provide excellent material for a write-up or future publication.
+I have taken the first steps towards fixing this gap in my knowledge by working through `The IDA Pro Book' \cite{ida-book}, Malware Unicorn online reverse engineering tutorials \cite{malware-unicorn}, and the textbook `Practical Malware Analysis' \cite{malware-analysis}, and will continue to develop these skills throughout the PhD.
 
 %==================================================================================================
-\section{Malware Lifecycles}
+\section{Research Topic Background}
+
+Malware and threat research is a fast-moving environment.
+The core idea of researching the use of IPv6 scanning by malicious groups came from reading academic research papers, but much of the information about the business operations of cybercrime groups and malware authors is presented through blog posts and reports published by individuals and cybersecurity companies.
+This section is therefore backed by citations from a combination of both academic sources, and from primary self-published resources from the information security community.
+
+\subsection{Malware Lifecycles}
 
 As more and more and more of their customers gained access to the Internet, many businesses made their services more convenient by moving them online.
 The use of online services has become increasingly normalised in the decades since this initial move;
@@ -450,7 +492,7 @@ This is not necessarily true:
 the search space can be reduced to feasible ranges, and metadata embedded in IPv6 addresses, particularly in poorly secured IoT devices, can provide attackers with key information about devices which is not revealed by equivalent IPv4-based scans.
 
 %==================================================================================================
-\section{IPv6 Scanning for Malware-as-a-Service}
+\subsection{IPv6 Scanning for Malware-as-a-Service}
 
 Recruitment of more devices is of interest to MaaS groups, given that an increased number of loader-infected devices increases their profits.
 A combination of Internet-wide scans and local network scans for lateral spread will produce the highest yield of hosts;
@@ -601,7 +643,7 @@ I will prove this by demonstrating that scanning an address space for specific c
 
 %0=================================================================================================
 \section{Research Plan}
-begin{table}[]
+\begin{table}[]
 \centering
 \label{longheader-values}
 \begin{center}
