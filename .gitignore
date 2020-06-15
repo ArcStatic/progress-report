@@ -1,3 +1,6 @@
 papers/*
 !papers/example.bib
 !papers/report.tex
+!papers/scanning.png
+!papers/email.png
+!papers/ipv6addr.png
