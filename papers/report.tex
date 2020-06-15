@@ -304,18 +304,6 @@
 % The complete metadata is likely only available when preparing the final,
 % camera ready, version of the paper.
 
-%==================================================================================================
-\maketitleSTD
-\begin{abstract}
-  % Four sentences:
-  %  - State the problem
-  %  - Say why it's an interesting problem
-  %  - Say what your solution achieves
-  %  - Say what follows from your solution
-
-  The abstract goes here.
-
-\end{abstract}
 \maketitleACM
 
 %==================================================================================================
@@ -440,36 +428,51 @@ The convenience offered by these services is clearly of high value to many peopl
 Unfortunately, criminal organisations have also found a range of opportunities in these developments.
 Millions of users submitting sensitive data, such as addresses and banking details, is a goldmine of information to malicious actors, who can easily use information held on a compromised server for identity theft or illicit financial gain.
 Ransomware in particular has been on the rise in recent years, directly extorting payment from victims on the basis that that many businesses and individuals do not reliably back up important data.
-Certain botnet variants, such as Mirai, IoT Reaper, and Mozi, focus specifically on recruiting poorly secured IoT devices left with default login credentials to launch Distributed Denial of Service (DDoS) attacks on key Internet infrastructe, such as DNS servers and Internet Service Providers.
+Certain botnet variants, such as Mirai, IoT Reaper, and Mozi, focus specifically on recruiting poorly secured IoT devices left with default login credentials to launch Distributed Denial of Service (DDoS) attacks on key Internet infrastructe, such as DNS servers and Internet Service Providers \cite{antonakakris2017}.
 
 The economy surrounding different types of malware has become increasingly complex as the range of devices on the market and associated attacks has increased.
-Pay-Per-Install (PPI) services were common means of malware distribution in the early 2010s;
+Pay-Per-Install (PPI) services were common means of malware distribution in the early 2010s \cite{ppi};
 clients (often, but not exclusively, malware authors) would approach a service to install their software on a number of machines in exchange for a fee.
 The actors who would actually install these programs, known as affiliates, would earn commission based on how many instances of these programs they managed to install;
 this was somewhat competitive, as affiliates developed exploits independently and had installs verified through the use of a unique code reported back to the PPI service.
 PPI services have been superceded by Malware-as-a-Service (MaaS) operators, who typically deploy malware variants known as `loaders'.
 These are designed to be subtle and persistent in order to act as a gateway for loading other malware onto infected systems;
-other malware operators, typically ransomware gangs, rent these devices for a period of time to run their malware campaigns in exchange for a fixed fee or a cut of the profits.
-%Ransomware variants typically show an intimidating lockscreen designed to scare users into complying with the ransom demand (bright red backgrounds and live countdown timers are used in many samples).
+other malware operators, typically ransomware gangs, rent these devices for a period of time to run their malware campaigns in exchange for a fixed fee or a cut of the profits \cite{emotet-lease}.
 
-Loader malware typically enters machines through spam email campaigns, where a user attempts to open a malicious email attachment of some sort.
-The malware then spreads laterally, infecting other hosts on the local network through IPv4 address space scans.
+Loader malware typically enters machines through spam email campaigns, where a user attempts to open an email attachment of some sort or clicks a malicious link \cite{emotet-malspam} \cite{jasperloader}.
+The malware can then spread laterally, infecting other hosts on the local network through IPv4 address space scans \ref{email-vector}.
+
+\begin{figure}
+\centering
+        \includegraphics[totalheight=8cm]{email.png}
+    \caption{A laptop becomes the initial infection vector on a local network. The malware gains access to the laptop through opening a malicious attachment or link; the firewall does not protect against this, since incoming email and web traffic are both allowed. Scanning probes, however, are blocked; no ports have been opened for IoT devices on this network, either manually or through UPnP.}
+    \label{email-vector}
+\end{figure}
+
 The use of spam email campaigns with malicious payloads generally targets mainstream operating systems running on complex devices like smartphones, laptops, and desktops: devices with a graphical display and text inputs are common targets for keylogger software or popular ransomware variants.
 However, this vector is not limited to these more complex devices: an ambitious criminal enterprise could also use lateral spread to install adapted loader software or otherwise compromise IoT devices on the same local network.
 IoT devices are generally lightweight, and run their own custom operating systems to allow them to perform their required functions within certain constraints (eg. physical size, battery life);
 security is often poorly implemented within these custom operating systems, and users often leave the default login credentials in place and fail to apply updates, making IoT devices easy targets for compromise.
 Malicious spam campaigns targeting personal email accounts, rather than work accounts, are increasingly likely to gain entry to a network containing these poorly secured IoT devices which could capture unusual types of sensitive information:
-a keylogger on a laptop or a smartphone can give information about banking details, passwords, and instant messages, but the compromise of an IoT device could lead to an attacker having access to anything from live audio and video feeds, to control of a home thermostat, to being able to start a fire in the victim's home.
+a keylogger on a laptop or a smartphone can give information about banking details, passwords, and instant messages, but the compromise of an IoT device could lead to an attacker having access to anything from live audio and video feeds, to control of a home thermostat, to being able to start a fire in the victim's home \cite{candletouch}.
 
 Initial compromise through email attachments is useful for host recruitment in cases where the host is adequately protected by a firewall from Internet-wide scans, for both IoT and for more complex devices:
 a device such as a smartphone, laptop, or desktop acts as the initial vector, which goes on to infect other devices on the network.
 However, many IoT devices intentionally weaken firewall security using a feature known as Universal Plug and Play (UPnP).
 This automatically enables port forwarding on routers to enable access to IoT devices remotely, allowing users to access functionality like remote video feeds and thermostat adjustment while they are away from home.
 While convienient for the user, this also allows attackers access to these devices;
-in the case of Mirai malware variants, these exposed IoT devices are often recruited as part of a botnet used to launch DDoS attacks.
+in the case of Mirai malware variants, these exposed IoT devices are often recruited as part of a botnet used to launch DDoS attacks \cite{mirai-traffic}.
+
+\begin{figure}
+\centering
+        \includegraphics[totalheight=8cm]{scanning.png}
+    \caption{A smart camera becomes the initial infection vector for devices on a home network. The device automatically allows traffic to bypass the firewall due to automatic port forwarding enabled by UPnP, allowing access to authorised and unauthorised users alike.}
+    \label{iot-vector}
+\end{figure}
+
 IoT devices which do not require remote access, and complex devices which do not use UPnP, like smartphones and laptops, are generally not vulnerable to Internet-wide scans and would be more likely to become targets through lateral spread through local networks, as described earlier.
-It is worth noting, however, that a UPnP-enabled IoT device recruited through the use of an Internet-wide scan could become the initial vector which compromises other devices on the local network;
-this is effectively an inverse infection pattern to the malicious email scenario described earlier.
+It is worth noting, however, that a UPnP-enabled IoT device recruited through the use of an Internet-wide scan could become the initial vector which compromises other devices on the local network, as shown in figure \ref{iot-vector};
+this is effectively an inverse infection pattern to the malicious email scenario described earlier in figure \ref{email-vector}.
 
 
 Both Internet-wide and local network scans continue to rely on scans of the IPv4 address space;
@@ -493,17 +496,18 @@ IoT devices recruited through Internet-wide scans and devices infected by malici
 Internet-exposed IoT devices may even be a preferred route of compromise:
 a user who may not fall for opening a suspicious email attachment may still have their other devices infected by a compromised IoT device without being aware an attack is even taking place.
 Complex devices can become hosts to many different kinds of malware, but the wide range of purposes served by IoT devices also means that there is a potential market for leasing them for additional purposes in addition to typical Mirai-style DDoS attacks, such as accessing live audio or video capture, changing the displays of digital billboards, or holding key home infrastructure like smart thermostats to ransom.
-As the number of purposes served by IoT devices grows, so does the range of potential use-cases for criminal enterprises.
+As the number of purposes served by IoT devices grows, so does the range of potential use-cases for criminal enterprises  \cite{antonakakis2017}.
 
 
 Both lateral spread through networks and mass recruitment through Internet-wide scans both currently rely on scans of the 32-bit IPv4 address space.
 An exhaustive scan of the IPv4 address space on the wider Internet is trivial:
 these can be performed in 5 minutes at a minimum, but are typically performed over a few hours to reduce suspicion.
-As a result of widespread use of UPnP, these scans are capable of yielding thousands of hosts, with Mirai hosts generating over 1Tbps of DDoS traffic in an attack against DNS provider Dyn in 2016.
+As a result of widespread use of UPnP, these scans are capable of yielding thousands of hosts, with Mirai hosts generating over 1Tbps of DDoS traffic in an attack against DNS provider Dyn in 2016 \cite{mirai-traffic}.
 An IPv4 scan on a local network is even easier, given that the search space is reduced further by a local netmask.
+
 IPv6 addresses are 128 bits long, and are usually split into two 64-bit halves: the network prefix and the interface identifier.
 An exhaustive search of this space is not feasible.
-However, it can be reduced through publicly accessible information such as Border Gateway Protocol (BGP) advertisements and device metadata embedded in IPv6 addresses.
+However, it can be reduced through publicly accessible information such as BGP advertisements and device metadata embedded in IPv6 addresses.
 All modern operating systems for smartphones, laptops, and desktops obscure this information through the use of IPv6 privacy extensions, but the custom operating systems on IoT devices either openly expose this information, or obscure it poorly through weak random number generation.
 This lack of obfuscation, combined with a general lack of focus on security, continues to make IoT devices an easy target for malicious actors, particularly when they can use this exposed metadata to determine which type of device has been infected and can therefore offer a more bespoke MaaS operation to potential clients;
 this is not possible from address alone in IPv4 scans.
@@ -515,7 +519,7 @@ However, there is a persistent myth that switching to IPv6 is more secure becaus
 even if an IoT device only uses IPv6, it is still vulnerable to port scanning attacks if it does not employ robust IPv6 privacy addressing methods.
 
 IoT devices are the primary focus of this PhD project due to the complete lack of privacy addressing in many instances, but, as described earlier, more complex devices like smartphones, laptops, and desktops are not immune from being compromised as a result of IPv6 scans.
-According to RFC7707, stateless address autoconfiguration (SLAAC) support is mandatory for IPv6 address allocation;
+According to RFC7707 \cite{rfc-ipv6-rec}, stateless address SLAAC support is mandatory for IPv6 address allocation;
 this is the addressing method which leaves the MAC address of a device's network interface card (NIC) exposed in an allocated address.
 More complex operating systems assign an IPv6 privacy address, which obscures the MAC address of the interface and therefore gives away less information about the device in outgoing traffic;
 it is not clear if these are allocated in addition to these SLAAC addresses or as a replacement.
@@ -541,7 +545,7 @@ The first machine is infected with malware as a result of a user opening a malic
 being able to inspect this first host gives the malicious application a wealth of information, including the 64-bit network prefix used in IPv6 addresses in this particular network.
 This halves the search space, leaving the remaining 64 bits which make up the interface identifier.
 
-The first half of a MAC address (ie. the first 24 bits) is known as an organisationally unique identifier (OUI), which is specific to the manufacturer of a given network interface card;
+The first half of a MAC address (ie. the first 24 bits) is known as an organisationally unique identifier (OUI), which is specific to the manufacturer of a given network interface card \cite{oui-list};
 the second half of the address is specific to that card.
 In SLAAC-assigned IPv6 addresses, this OUI is used as the first 24 bits in the network interface identifier half of the address.
 The constant \texttt{0xFFFE} is used in the following 16 bits of the IPv6 address.
@@ -555,7 +559,7 @@ a larger number of located targets translates into a business advantage for such
 It is therefore important to consider the use-case of attackers performing Internet-wide scans of the IPv6 address space to find targets not adequately protected by firewalls.
 
 BGP is used to exchange routing and reachability information between autonomous systems on the wider Internet.
-BGPStream is an application which can be used to process historic BGP data gathered by points known as collectors.
+BGPStream is an application which can be used to process historic BGP data gathered by points known as collectors \cite{bgpstream}.
 Announcement messages are of particular interest to this scanning project:
 these indicate that a new IPv6 network prefix was being advertised by an autonomous system, and shows an IPv6 network prefix which was in use at the time.
 Each prefix is accompanied by a mask, which indicates how many bits must be set to specific values for that address;
@@ -566,10 +570,11 @@ These announcement messages can be scraped using the BGPStream API to give a lis
 Further filtering can be done on this list to remove any duplicate prefixes (ie. prefixes which were announced more than once), and to identify which prefixes are subsets of other prefixes
 (ie. if two prefixes have the same address but different masks, the advertised prefix with the larger number as its mask is a subset of the prefix which has the smaller number, due to having more bits set to pre-determined values).
 
-The tutorial for prefix monitoring on the BGPStream website scrapes BGP data obtained over 5 hours on August 12th 2014.
+The tutorial for prefix monitoring on the BGPStream website \cite{bgpstream-tutorial} scrapes BGP data obtained over 5 hours on August 12th 2014.
 This dataset was relatively small, and therefore a useful starting point for testing the scripts which removed duplicate address announcements and counted the number of instances of each prefix mask.
 This process was repeated for gathering and processing IPv6 prefix announcement data over 5 hours on May 26th 2020, by the same collector which, theoretically, had the same view of the Internet as it did in 2014;
 the 2020 dataset was much larger, containing 88,139 unique advertised prefixes, compared to the 2014 set which only had 1150.
+
 \begin{table}[]
 \centering
 \label{ipv6-scanning}
@@ -650,6 +655,13 @@ This is still feasible, but not as likely to produce results as quickly as searc
 /48 advertisements are therefore likely to remain a more popular target for these kinds of attacks.
 
 
+\begin{figure}
+\centering
+        \includegraphics[totalheight=8cm]{ipv6addr.png}
+    \caption{Example of the remaining search space when scanning /48 IPv6 prefix advertisements for devices with SLAAC-assigned addresses.}
+    \label{ipv6addr}
+\end{figure}
+
 Fully-formed 64-bit IPv6 address prefixes can also be obtained through side-channel attacks, such as harvesting addresses from responses to phishing emails, or eavesdropping on network traffic.
 These are important security risks to consider, particularly because attacks using these approaches are less complex to perform than using BGP data as described in this section.
 For obvious ethical reasons, in-depth analysis of these side-channel attacks are beyond the scope of this project, but proposed fixes to improve IPv6 security could still help to mitigate any potential damage they may cause;
@@ -657,10 +669,10 @@ improvements in IPv6 addressing security provides additional protection no matte
 
 \subsection{Relevance of Work to Recent Events}
 The threat posed by mass recruitment of poorly secured IoT devices is not theoretical.
-Malware families like Mirai, IoT Reaper, and Mozi have taken advantage of lax IoT security in recent years to recruit hosts for botnets, with Mirai in particular amassing enough bots to generate over 1Tb/s of traffic used for distributed denial of service (DDoS) attacks.
+Malware families like Mirai, IoT Reaper, and Mozi have taken advantage of lax IoT security in recent years to recruit hosts for botnets, with Mirai in particular amassing enough bots to generate over 1Tb/s of traffic used for distributed denial of service (DDoS) attacks \cite{mirai-traffic}.
 When working as intended, Mirai denial of service attacks managed to take down Dyn, a popular DNS provider, which prevented many users from accessing popular sites like Amazon and Twitter.
 When not working as intended, Mirai still managed to cause a widespread service outage for TalkTalk and Deutche Telekom customers by taking 900,000 infected routers offline;
-this was caused by a buggy implementation of Mirai which unintentionally deactivated routers instead of using them to contribute to DDoS attacks.
+this was caused by a buggy implementation of Mirai which unintentionally deactivated routers instead of using them to contribute to DDoS attacks \cite{antonakakis2017}.
 
 As shown by the notable increase in the number of IPv6 prefix advertisements in the 2020 BGP dataset compared to the 2014 equivalent, IPv6 deployment is on the rise.
 The number of IoT devices on the market is also increasing, with devices like Amazon Alexa being specifically marketed for domestic use by users who are unlikely to know how to secure their home networks.
@@ -681,6 +693,9 @@ I will prove this by demonstrating that scanning an address space for specific c
 
 %0=================================================================================================
 \section{Research Plan}
+
+Table \ref{research-timeline} gives the proposed timeline for each of the experiments described below.
+
 \begin{table}[]
 \centering
 \label{research-timeline}
@@ -702,69 +717,58 @@ I will prove this by demonstrating that scanning an address space for specific c
 \end{center}
 \end{table}
 
-Determine if privacy addresses replace SLAAC addresses
-\begin{itemize}
-	\item Search documentation on MSDN, Linux kernel code, BSD kernel code, Apple developer documentation to find out if IPv6 SLAAC addresses remain active even when a privacy address has been assigned.
-	\item Attempt to contact machines using various mainstream operating systems using local scanning knowledge to find out if any response is given to contact with SLAAC address.
-	\item Determine if virtual machine addressing conventions outlined in RFC7707 are used in practice using the same steps above.
-\end{itemize}
+\subsection{Determine if privacy addresses replace SLAAC addresses}
+In order to determine whether more complex devices like smartphones, laptops, and desktops are at risk of being located over IPv6 using their MAC address information alongside IoT devices, I need to find out whether SLAAC addresses are assigned in addition to privacy addresses, or whether they replace them.
+An initial starting point would be to search documentation on MSDN, Linux kernel code, BSD kernel code, and Apple developer documentation to find out if IPv6 SLAAC addresses remain active even when a privacy address has been assigned.
+I can then attempt to contact machines using various mainstream operating systems using local scanning knowledge to find out if any response is given to contact with SLAAC address, and note whether these outcomes match what is described in the documentation or what should be expected from the source code.
+Local scans will also be performed in an attempt to locate virtual machines, to see if the virtual machine addressing conventions outlined in RFC7707 \cite{rfc-ipv6-rec} are used in practice.
 
-Determine how many IoT devices actually use IPv6
-\begin{itemize}
-	\item Find someone with a varied collection of IoT products - labs at Imperial and Northeastern should be good starting points for this.
-	\item Should be able to obtain and parse network logs to see how many devices connected and whether they have IPv6 addresses assigned.
-	\item Identify if there are certain manufacturers or types of device (eg. cameras) which consistently use IPv6.
-\end{itemize}
+\subsection{Determine how many IoT devices actually use IPv6}
+IoT devices are infamous for being insecure;
+however, in order to know whether they can be mass recruited by attackers using IPv6 scans, it is important to know how many of these devices actually use IPv6 in the first place.
+Imperial College London and Northeastern University both have labs with a wide range of IoT devices.
+If either of these institutions are willing to allow me to access these labs, I can obtain and parse network logs to see how many devices are communicating using an IPv6 address.
+From these, it should be possible to identify whether specific manufacturers consistently use IPv6 for their devices, and whether they use privacy extensions with robust random number generation.
 
-Find specific devices in a local network
-\begin{itemize}
-	\item Use local IPv6 scanning on the network in the previous study to find specific brands of IoT device which were found on this network previously.
-	\item If more complex devices like smartphones, laptops, and desktops are found to be reachable through their SLAAC addresses, try to find those on local networks as well. Also attempt to reach virtual machines.
-\end{itemize}
+\subsection{Find specific devices in a local network}
+Using the local scanning heuristics proposed in section \ref{current-work-local}, I will attempt to locate specific types of IoT device which were found on this network previously by their IPv6 address.
+If virtual machines and devices like smartphones, laptops, and desktops are found to be reachable through their SLAAC addresses, this experiment can be repeated for these devices as well.
 
-Longer term study of advertised IPv6 prefix length
-\begin{itemize}
-	\item Finding devices with Internet-wide IPv6 scans is unethical, so research into these scans needs to be mostly theoretical - could maybe try to contact a device I own from another network as proof of concept, but no substantial datasets can be gathered.
-	\item Identifying longer-term trends in advertised IPv6 prefixes means that we can see how much the scanning space can be reduced by.
-	\item Could trace which ASes advertised prefixes belong to - find out whether domestic ISPs are easier to scan in general because of larger masks in advertisements (eg. my home ISP advertises a /56 prefix, which is easy to scan), whether large businesses maintain the same prefixes and masks.
-\end{itemize}
 
-Investigate current use of IPv6 in malware
-\begin{itemize}
-	\item Several malware variants, such as ZeuS, a banking trojan, are known to use IPv6 for peer-to-peer traffic and tunneling.
-	Others use IPv6 unknowingly as a result of being composed of recycled malicious code from other samples.
-	None are known to use IPv6 scanning for host recruitment as yet;
-	this is unlikely to have changed within the next two years, but it is important to check this instead of assuming.
-	\item If any novel samples are found to use IPv6 scanning during the course of this PhD, I will perform analysis of the sample (binary, dynamic linked library, etc.) to identify exactly how it performs these scans, and whether they matched predictions made about scanning strategies earlier in the PhD.
-	\item Collaboration with anti-virus companies could be very beneficial here:
-	large repositories of catalogued samples, and awareness of this work within industry.
-\end{itemize}
+\subsection{Longer term study of advertised IPv6 prefix length}
+Finding devices with Internet-wide IPv6 scans is unethical, so research into these scans needs to be mostly theoretical.
+It might be possible to try locating a device a device I own across the Internet from another network, but no substantial datasets can be gathered.
+Identifying longer-term trends in advertised IPv6 prefixes means that we can see how much the scanning space can be reduced by in specific use-cases;
+several ISPs serving home environments advertise /56 prefixes, which would be more appealing to attackers looking to recruit, for example, smart TVs, while attackers looking to recruit hosts for malware leasing in an enterprise network may want to scan a different range of prefixes more commonly associated with that kind of environment.
 
-Identify which kinds of services are offered by cybercrime organisations
-\begin{itemize}
-	\item IoT botnet operations for DDoS attacks aren't generally a viable business venture since Mirai was released as open source malware for this purpose.
-	\item Malware-as-a-service operations currently use banking trojans like Dreambot and Trickbot as loader software on smartphones, laptops, and desktops, which are usually leased to ransomware gangs.
-	This is a fast-moving environment, so it's possible that IoT device recruitment for non-DDoS purposes could be happening by this point.
-	\item There are recent signs of malware-as-a-service cartels co-operating with each other to a much greater degree than usual, under the banner of Maze ransomware.
-	This could change the threat landscape significantly, and is worth investigating as part of this PhD;
-	non-governmental actors are said to be `not skilled enough' to write complex malware (including making use of IPv6), and this could change as a result of these collaborations.
-\end{itemize}
+\subsection{Investigate current use of IPv6 in malware}
+Several malware variants, such as ZeuS, a banking trojan, are known to use IPv6 for peer-to-peer traffic and tunneling \cite{zeus}.
+Others use IPv6 unknowingly as a result of being composed of recycled malicious code from other samples.
+To the best of my knowledge, none are known to use IPv6 scanning for host recruitment as yet, but this may change within the next three years.
+If any novel samples are found to use IPv6 scanning during the course of this PhD, I will perform analysis of the sample (binary, dynamic linked library, etc.) to identify exactly how it performs these scans, and whether they matched predictions made about scanning strategies earlier in the PhD.
 
-Security improvements
-\begin{itemize}
-	\item Think about which measures would have stopped earlier experiments from succeeding:
-	how could these scans have been blocked?
-	Which guidance in IPv6 RFCs should be changed, and which specific recommendations should be made to device manufacturers?
-	Insecure IoT devices will have the most obvious IPv6 security flaws to fix, but developers of operating systems for smartphones, laptops, and desktops may also have areas to fix.
-	\item Evaluate whether business trends in the malware-as-a-service industry could lead them to employ IPv6 scanning in the future:
-	`is there actually a business advantage to using targeted IPv6 scanning in terms of raising less suspicion with intrusion detection systems, and in being able to recruit more specific classes of devices with specific scans.'
-\end{itemize}
+Surveying the use of IPv6 within current malware samples would allow me to determine how much use malware authors currently have for IPv6, and to get an idea of how much expertise is involved in writing IPv6-enabled malware.
+Collaboration with anti-virus companies would be very beneficial here;
+access to large repositories of catalogued samples, awareness of this work within industry, and the opportunity to learn from expert analysis would be an excellent opportunity.
 
-Thesis write-up
-\begin{itemize}
-	\item Each experiment listed above will hopefully have resulted in one or more publications, and will have been written up as a chapter of the thesis.
-	The last few months of the PhD will be spent writing up final conclusions, and ensuring that the thesis flows well as a single document.
-\end{itemize}
+\subsection{Identify which kinds of services are offered by cybercrime organisations}
+IoT botnet operations for DDoS attacks are no longer a viable business venture since Mirai was released as open source malware for this purpose \cite{mirai-open-source}.
+Malware-as-a-service operations currently use trojans, like Emotet and the potentially defunct Dreambot, as loader software on smartphones, laptops, and desktops, which are leased to ransomware gangs \cite{emotet-lease} \cite{dreambot}.
+This is a fast-moving environment, so it's possible that IoT device recruitment for non-DDoS purposes could be happening by this point.
+
+There are recent signs of malware-as-a-service cartels co-operating with each other to a much greater degree than usual, under the banner of Maze ransomware \cite{maze-ransomware}.
+This could change the threat landscape significantly, and is worth investigating as part of this PhD;
+more organised collaboration could further increase the complexity of the malware these organisations are about to produce, and could potentially allow for recruitment via complex IPv6 scans to occur in the wild.
+
+\subsection{Security improvements}
+Proving the viability of IPv6-based attacks and their potential use-cases is important, but responsibility also needs to be taken for suggesting which measures would have stopped these attacks from succeeding;
+finding ways to block these scans is important to improve security for any Internet-connected environment, whether that's a large enterprise network, or a home network served by a default ISP-supplied router.
+Insecure IoT devices will have the most obvious IPv6 security flaws to fix, but developers of operating systems for smartphones, laptops, and desktops may also have areas to fix.
+Security advice could be given in the form of amendments to existing IETF RFCs related to IPv6, or specific recommendations to IoT device manufacturers.
+
+\subsection{Thesis write-up}
+The experiments listed above will hopefully have resulted in one or more publications each, and will have been written up as a chapter of the thesis.
+The last few months of the PhD will be spent writing up final conclusions, and ensuring that the thesis flows well as a single document.
 
 
 %==================================================================================================
