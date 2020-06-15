@@ -319,21 +319,23 @@
 \maketitleACM
 
 %==================================================================================================
-\section{Initial Literature Review}
+\section{Initial Reading}
 
 % Literature survey
 When I accepted the PhD offer, I took this as an opportunity to dedicate several years to studying a topic which has been of personal interest for some time: malware.
 This was the starting point of my research readings during my first year, and this survey section will start with a review of the papers I read as part of my initial efforts to find a research angle on this topic.
-My next step was trying to connect this recent reading about malware and online threats to areas I already have some experience of as a result of past research internships and level 4 and 5 research projects;
-I was already attempting to learn a new domain by reading malware and threat research articles, attempting to learn another unfamiliar domain in addition to this would have less chance of leading to a productive research topic than integrating my existing knowledge of network protocol design.
+My next step was trying to connect this recent reading about malware and online threats to areas I already have some experience of as a result of past research internships and level 4 and 5 research projects.
+%I was already attempting to learn a new domain by reading malware and threat research articles, attempting to learn another unfamiliar domain in addition to this would have less chance of leading to a productive research topic than integrating my existing knowledge of network protocol design.
 Sections \ref{malware-in-transit} reflects on the papers read during this stage.
 
-One pattern that I noticed being repeated in several network measurement papers was the use of scans of the IPv4 address space.
-This led me to read about strategies to scan the IPv6 address space, and any malware was known to use IPv6 address space scanning yet.
-My readings into network measurements and IPv6 are discussed in sections \ref{network-measurements} and \ref{ipv6-reading}.
+A paper presentation I watched at a conference last year encouraged me to read into the wider context of cybercrime and to consider moving my research beyond solely technical analysis.
+This is discussed in section \ref{cybersecurity}.
 
-I also continued to read about the wider context of systems security and cybercrime in parallel to these other topics.
-These papers are discussed in section \ref{cybersecurity}.
+A pattern that I noticed being repeated in several network measurement papers was the use of scans of the IPv4 address space.
+This led me to read about strategies to scan the IPv6 address space, and to the realisation that IPv6 address space scanning is difficult to perform even for benign purposes like local network maintenance;
+its use for host recruitment by malicious actors remains an open research question.
+My readings into network scanning methods and IPv6 scanning strategies are discussed in section \ref{internet-scanning}.
+
 
 \subsection{Malware Samples}
 \label{malware-reading}
@@ -360,19 +362,54 @@ Adapting deep traffic inspection and suspicious API calls for a heavily encrypte
 However, this was still at an early stage of the initial literature review, and was similar to the Direct Code Execution \cite{tazaki2013} project I was supposed be doing at Internet Initiative Japan Innovation Institute (IIJ-II) last month (postponed until after the pandemic);
 I decided to spend more time reading to see what other potential research topics were of interest.
 
-\subsection{Network Measurements}
-\label{network-measurements}
-
-\subsection{IPv6 Networks}
-\label{ipv6-reading}
-
 \subsection{Cybercrime and Security}
 \label{cybersecurity}
+In October 2019 I attended the Internet Measurement Conference (IMC'19).
+One of the talks focused a paper on the effects of police interventions on operators and clients of denial of service-for-hire services, known as `booters' \cite{collier2019}.
+One particular finding was genuinely surprising:
+simple web banner advertisements warning that booter services are illegal dissuades many potential new clients from using these services, and were even more effective at dissuasion than the arrests of the operators of these services.
+
+I had a chance to talk with two of the authors of this paper, Ben Collier and Daniel Thomas, who are based at the University of Cambridge and the University of Strathclyde respectively.
+This discussion was productive:
+I learnt that my work did not have to be exclusively technical, and that I could take time to learn how to produce work with more of a social sciences angle if I felt the research topic required it.
+This has been a key influence in the direction I want my PhD project to take;
+the technical side of exploits and vulnerabilities is interesting, but understanding the social and economic influences behind the markets for malicious software is key to evaluating how likely it is that these exploits might actually be used in practice.
+
+Research in this area is challenging, with many legal and ethical considerations to be aware of.
+Another paper by Thomas et al. \cite{thomas2017} addresses issues with using `datasets of illicit origin', such as unauthorised data leaks, or unintentional data disclosure through user error.
+The assertion in this paper is that all work completely or partially produced using datasets in this category should have an ethics section, discussing any potential harm which could have been caused to individuals in these datasets and the measures taken to minimise such harm.
+I will need to carefully consider the ethical considerations of my PhD work;
+many experiments can be conducted in controlled environments, but some, such as Internet-wide vulnerability scans, will need to be severely restricted or left entirely theoretical to avoid causing unnecessary harm.
+
+\subsection{IPv6 Scanning}
+\label{ipv6-reading}
+While reading about an Internet-wide scan being performed for the entire 32-bit IPv4 address space by a botnet \cite{dainotte2013}, two questions occurred to me:
+how would a scan of the 128-bit IPv6 space be performed, and how could a botnet recruit enough hosts in an IPv6-only environment to be viable?
+
+Work by Murdock et al. \cite{murdock2017} describes tools which appear to use statistical modelling to generate lists of active IPv6 addresses in the wider Internet.
+A paper by Gasser et al. \cite{gasser2016} explores a hybrid approach to building IPv6 hitlists, using both passive sampling of incoming traffic and active scanning;
+as discussed in \cite{thomas2017}, this paper contains an ethics discussion reflecting on how active scans can be interpreted as malicious and can cause issues for hosts receiving active scanning traffic.
+The dataset used for passive sampling in this study is from a large European Internet Exchange Point (IXP).
+This is unlikely to be an accessible source of data for most attackers, but data obtained from publicly accessible DNS records and traceroutes could feasibly used to generate .
+
+An article from a 2006 issue of `;login:', the Usenix magazine, details the specific scenario of how worms could spread through IPv6 networks \cite{bellovin2006}.
+As one would expect of an article from 14 years ago, some of this information is outdated:
+there is no mention of privacy addresses, a feature outlined in RFC 4941 \cite{rfc-privacy-ext} and used for IPv6 addressing in all modern, mainstream operating systems,
+and the authors state that an ``informal poll'' of network operators suggests that servers would be addressed statically, towards the low end of the subnet address range;
+IPv6 addresses are likely to be given to servers via dynamic host configuration protocol for IPv6 (DHCPv6).
+However, the majority of the suggested sources of information still apply, such as gaining prefix information from Border Gateway Protocol (BGP) advertisements.
+Some sources of address information may no longer apply to desktop and laptop devices which were in use in 2006, but have become relevant once again through the increasing popularity of poorly secured IoT devices:
+media access control (MAC) addresses of IoT devices are unlikely to be obscured in an assigned IPv6 address by privacy extensions, so this can be used for reconnaisance by an attacker.
+RFC 7707 \cite{rfc-ipv6-rec}, produced 10 years later in 2016, takes a far more in-depth technical view of IPv6 reconnaisance techniques, and provides a wealth of information about which patterns can be used to reduce the potential IPv6 search space down to a manageable range.
+A particularly interesting detail in this document is that stateless address autoconfiguration (SLAAC) support is (in an ideal, RFC-compliant world) mandatory;
+this potentially means that operating systems which use privacy extensions for IPv6 addressing could also allocate an address which exposes the interface's MAC address, possibly in addition to this obscured address.
+RFC 7707, and this Usenix article, are both valuable starting points for learning how attackers might exploit information in IPv6 addresses for the discovery potentially vulnerable devices, potentially for use in botnets.
+
 
 Paper topics:
 - Malware
 	o dynamic analysis evasion techniques survey (afianian2017)
-	- worm propagation strategies (automated host transmission - doesn't address IoT or specific device scans tho)
+	o worm propagation strategies (automated host transmission - doesn't address IoT or specific device scans tho) (bellovin2006)
 	o survey on current state of security in android platform (bhat2019)
 	- survey of intrusion detection systems leveraging host data
 	o generic binary analysis method for malware (izumida2010)
@@ -391,10 +428,10 @@ IPv6:
 	- RFC3041: first document about IPv6 privacy extensions, 2001
 	- RFC4941: update to above, 2007
 	- RFC7707: reconnaisance techniques for IPv6
-	- scanning the IPv6 Internet: comprehensive hitlist
+	- scanning the IPv6 Internet: comprehensive hitlist (gasser2016)
 	- address types pamphlet from RIPE NCC
 	- adaptive honeypot system to capture IPv6 scans
-	- target generation for Internet-wide IPv6 scanning
+	- target generation for Internet-wide IPv6 scanning (murdock2017)
 	- tor instead of IP
 
 IoT:
@@ -403,11 +440,8 @@ IoT:
 	- 
 
 Cybercrime/security:
-	- booting the booters
-	- following their footsteps: characterizing account automation abuse
-	- survey on cloud forensics challenges, solutions, and future directions
-	- ethical issues in research using datasets of illicit origin
-	- needle in a haystack: tracking down elite phishing domains in the wild
+	- booting the booters (collier2019)
+	- ethical issues in research using datasets of illicit origin (thomas2017)
 
 Network analysis:
 	- empirical study of I2P anonymity network and censorship resistance
@@ -416,20 +450,27 @@ Network analysis:
 	- pushing the boundaries with bdrmapIT: mapping router ownership at scale
 	o direct code execution: revisiting library OS architecture for reproducable network experiments (tazaki2013)
 	- how to catch when proxies lie
-	- analysis of a /0 stealth scan from a botnet
+	o analysis of a /0 stealth scan from a botnet (dainotte2013)
 	- tor instead of IP
 	- using honeynets for internet situational awareness
 	- using packet symmetry to curtail malicious traffic
 	- the day after patch Tuesday
 
-Misc:
-	- predictive analysis in NFV
+\subsection{Current reading}
 
-Although the topic I have chosen, use of IPv6 scanning for host recruitment in malware, can be researched without any practical knowledge of malware analysis, learning this skill is important in order to understand and critically evaluate malware-centric papers better, and is a valuable skill for the future;
-knowing how to analyse malware samples, learning common compiler conventions, and understanding the quirks of different types of assembly code are all important for a career in industry research in this area.
+Understanding the technical feasibility of malware using IPv6 for host recruitment is important;
+this is obvious, and so I will continue reading more Internet standards documents and academic papers related to routing, security, and address space search algorithms in IPv6 networks.
+However, understanding the context of modern cybercrime activities and economic trends in the malware `industry' is vital for evaluating how likely it is that any of the proposed attacks would be used, and which factors might affect this.
+Making additional contacts and potentially collaborating with economics, sociology, and criminology researchers would be ideal for producing high quality work related to this area, as was the case with the booters paper by Collier et al. \cite{collier2019};
+I have some knowledge of the technical details involved in attacks, but I am not yet qualified to carry out the social or economic science elements of these experiments.
+
+Although the topic I have chosen, use of IPv6 scanning for host recruitment in malware, can be researched without any practical knowledge of malware analysis, learning this skill is key to understanding write-ups detailing current malware behaviours seen in the wild.
+Knowing how to analyse malware samples, learning common compiler conventions, and understanding the quirks of different types of assembly code are all important for a career in industry research in this area.
 To the best of my knowledge, malware using IPv6 scanning for host recruitment does not yet exist, but this could change over the next three years;
 being able to perform first-hand analysis on such a sample would provide excellent material for a write-up or future publication.
 I have taken the first steps towards fixing this gap in my knowledge by working through `The IDA Pro Book' \cite{ida-book}, Malware Unicorn online reverse engineering tutorials \cite{malware-unicorn}, and the textbook `Practical Malware Analysis' \cite{malware-analysis}, and will continue to develop these skills throughout the PhD.
+
+
 
 %==================================================================================================
 \section{Research Topic Background}
