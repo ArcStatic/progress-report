@@ -383,7 +383,7 @@ many experiments can be conducted in controlled environments, but some, such as 
 
 \subsection{IPv6 Scanning}
 \label{ipv6-reading}
-While reading about an Internet-wide scan being performed for the entire 32-bit IPv4 address space by a botnet \cite{dainotte2013}, two questions occurred to me:
+While reading about an Internet-wide scan being performed for the entire 32-bit IPv4 address space by a botnet \cite{dainotte2014}, two questions occurred to me:
 how would a scan of the 128-bit IPv6 space be performed, and how could a botnet recruit enough hosts in an IPv6-only environment to be viable?
 
 Work by Murdock et al. \cite{murdock2017} describes tools which appear to use statistical modelling to generate lists of active IPv6 addresses in the wider Internet.
@@ -405,56 +405,6 @@ A particularly interesting detail in this document is that stateless address aut
 this potentially means that operating systems which use privacy extensions for IPv6 addressing could also allocate an address which exposes the interface's MAC address, possibly in addition to this obscured address.
 RFC 7707, and this Usenix article, are both valuable starting points for learning how attackers might exploit information in IPv6 addresses for the discovery potentially vulnerable devices, potentially for use in botnets.
 
-
-Paper topics:
-- Malware
-	o dynamic analysis evasion techniques survey (afianian2017)
-	o worm propagation strategies (automated host transmission - doesn't address IoT or specific device scans tho) (bellovin2006)
-	o survey on current state of security in android platform (bhat2019)
-	- survey of intrusion detection systems leveraging host data
-	o generic binary analysis method for malware (izumida2010)
-	o context-sensitive flow graph for binary analysis (izumida2018)
-	o towards adversarial malware detection (maiorca2019)
-	o tool for analysing and detecting malicious mobile code (mori2006)
-	o dynamic malware analysis in the modern era (or-meir2017)
-	o counterfeit object-oriented programming (schuster2015)
-	o evolution of android malware and android analysis techniques (tam2017)
-	o vigilante: containment of Internet worms (costa2005)
-	- booting the booters
-	o the case for writing a kernel in rust (levy2017)
-
-IPv6:
-	- worm propagation strategies ("although we do not have sufficient data, an informal poll of network operators suggested that servers would be assigned addresses statically, and that these addresses would be located in the low end of the subnet address range, significantly easing the task of a scanning worm" - 2006 paper)
-	- RFC3041: first document about IPv6 privacy extensions, 2001
-	- RFC4941: update to above, 2007
-	- RFC7707: reconnaisance techniques for IPv6
-	- scanning the IPv6 Internet: comprehensive hitlist (gasser2016)
-	- address types pamphlet from RIPE NCC
-	- adaptive honeypot system to capture IPv6 scans
-	- target generation for Internet-wide IPv6 scanning (murdock2017)
-	- tor instead of IP
-
-IoT:
-	- program analysis of IoT applications for security and privacy
-	- security analysis of autonomous systems
-	- 
-
-Cybercrime/security:
-	- booting the booters (collier2019)
-	- ethical issues in research using datasets of illicit origin (thomas2017)
-
-Network analysis:
-	- empirical study of I2P anonymity network and censorship resistance
-	- understanding tor usage with privacy preserving measurement
-	- first joint look at DoS attacks and BGP blackholing
-	- pushing the boundaries with bdrmapIT: mapping router ownership at scale
-	o direct code execution: revisiting library OS architecture for reproducable network experiments (tazaki2013)
-	- how to catch when proxies lie
-	o analysis of a /0 stealth scan from a botnet (dainotte2013)
-	- tor instead of IP
-	- using honeynets for internet situational awareness
-	- using packet symmetry to curtail malicious traffic
-	- the day after patch Tuesday
 
 \subsection{Current reading}
 
